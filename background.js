@@ -6,6 +6,8 @@ chrome.runtime.onInstalled.addListener(function () {
 chrome.alarms.onAlarm.addListener((alarm) => {
 	if (alarm.name.startsWith("reminder_")) {
 		const reminderTitle = alarm.name.replace("reminder_", "");
+
+		// Create a notification
 		chrome.notifications.create({
 			type: "basic",
 			iconUrl: "icon.png",
@@ -32,42 +34,33 @@ chrome.runtime.onStartup.addListener(() => {
 	chrome.storage.local.get("reminders", (data) => {
 		const reminders = data.reminders || [];
 		reminders.forEach((reminder) => {
-			const [hours, minutes] = reminder.time.split(":").map(Number);
-			const now = new Date();
-			const alarmTime = new Date();
-			alarmTime.setHours(hours, minutes, 0, 0);
-
-			if (alarmTime < now) {
-				alarmTime.setDate(alarmTime.getDate() + 1); // If the time has passed, set for the next day
+			if (reminder.active) {
+				scheduleAlarm(reminder.title, reminder.time);
 			}
-
-			let delayInMinutes = (alarmTime - now) / 60000;
-			if (delayInMinutes < 0.5) {
-				delayInMinutes = 0.5; // Ensure a minimum delay of 30 seconds
-			}
-			chrome.alarms.create(`reminder_${reminder.title}`, { delayInMinutes });
 		});
 	});
 });
 
 // Listen for the message to set a reminder
 chrome.runtime.onMessage.addListener((message) => {
-	if (message.type === 'set-alarm') {
+	if (message.type === "set-alarm") {
 		const { title, time, active } = message.reminder;
 		if (active) {
-			const now = new Date();
-			const [hours, minutes] = time.split(':').map(Number);
-			const alarmTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
-
-			if (alarmTime < now) {
-				alarmTime.setDate(alarmTime.getDate() + 1); // If the time has passed, set for the next day
-			}
-
-			let delayInMinutes = (alarmTime - now) / 60000;
-			if (delayInMinutes < 0.5) {
-				delayInMinutes = 0.5; // Ensure a minimum delay of 30 seconds
-			}
-			chrome.alarms.create(`reminder_${title}`, { delayInMinutes });
+			scheduleAlarm(title, time);
 		}
 	}
 });
+
+// Schedule an alarm for a reminder
+function scheduleAlarm(title, time) {
+	const now = new Date();
+	const [hours, minutes] = time.split(":").map(Number);
+	const alarmTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes);
+
+	if (alarmTime < now) {
+		alarmTime.setDate(alarmTime.getDate() + 1); // Set the alarm for the next day
+	}
+
+	const delayInMinutes = Math.max((alarmTime - now) / 60000, 0.5); // At least 30 seconds
+	chrome.alarms.create(`reminder_${title}`, { delayInMinutes });
+}

@@ -140,14 +140,3 @@ function scheduleNotification(title, time) {
 	// Send a message to set the alarm
 	chrome.runtime.sendMessage({ type: 'set-alarm', reminder: { title, time, active: true } });
 }
-
-chrome.alarms.onAlarm.addListener((alarm) => {
-	const notificationOptions = {
-		type: 'basic',
-		iconUrl: 'icon.png',
-		title: alarm.name,
-		message: `It's time for the reminder: ${alarm.name}`,
-		priority: 2
-	};
-	chrome.notifications.create(alarm.name, notificationOptions);
-});
