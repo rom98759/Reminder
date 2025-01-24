@@ -8,6 +8,13 @@ This Chrome extension helps you manage your reminders efficiently. You can add, 
 - Edit existing reminders.
 - Delete reminders.
 - Receive notifications for reminders.
+</br>
+
+<div style="display: flex; gap: 20px;">
+  <img src="https://github.com/user-attachments/assets/d2fa1bcb-d4a1-4074-b935-2c1a4b2a8a73" alt="Reminder image 1" />
+  <img src="https://github.com/user-attachments/assets/c7ba38de-f4b8-488d-ac81-ccaea47f3a0b" alt="Reminder image 2" />
+</div>
+
 
 ## Installation
 
