@@ -1,0 +1,124 @@
+body {
+	font-family: 'Arial', sans-serif;
+	padding: 20px;
+	width: 250px; /* Set a fixed width */
+	height: auto; /* Automatic height */
+	background-color: #f0f0f0;
+	border-radius: 10px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	overflow: hidden; /* Prevent scrolling */
+}
+
+#reminder-container {
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+	margin-bottom: 20px;
+}
+
+#title,
+#time {
+	padding: 10px;
+	font-size: 16px;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+}
+
+button {
+	background-color: #4CAF50;
+	color: white;
+	border: none;
+	padding: 10px;
+	font-size: 16px;
+	border-radius: 5px;
+	cursor: pointer;
+	transition: background-color 0.3s;
+}
+
+button:hover {
+	background-color: #45a049;
+}
+
+#reminder-list {
+	margin-top: 20px;
+	overflow-y: auto; /* Allow vertical scrolling if necessary */
+	max-height: calc(100% - 150px); /* Limit the height of the list */
+}
+
+.reminder-item {
+	display: flex;
+	flex-direction: column; /* Stack elements vertically */
+	padding: 10px;
+	margin-bottom: 10px;
+	background-color: white;
+	border-radius: 5px;
+	box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+	width: 90%; /* Take the full available width */
+	word-wrap: break-word; /* Allow line breaks for long texts */
+}
+
+.reminder-item-content {
+	display: flex;
+	flex-direction: column; /* Stack text above */
+	width: 100%;
+}
+
+.reminder-item-actions {
+	display: flex;
+	justify-content: flex-start; /* Align elements to the left */
+	align-items: center;
+	width: 100%;
+	margin-top: 10px; /* Add space between text and actions */
+	gap: 5px; /* Reduce space between elements */
+}
+
+.reminder-item span {
+	font-size: 16px;
+}
+
+.toggle-switch {
+	position: relative;
+	width: 40px;
+	height: 20px;
+	background-color: #ccc;
+	border-radius: 20px;
+	cursor: pointer;
+	transition: background-color 0.3s;
+}
+
+.toggle-switch::before {
+	content: "";
+	position: absolute;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	background-color: white;
+	top: 1px;
+	left: 1px;
+	transition: transform 0.3s;
+}
+
+input[type="checkbox"]:checked + .toggle-switch {
+	background-color: #4CAF50;
+}
+
+input[type="checkbox"]:checked + .toggle-switch::before {
+	transform: translateX(20px);
+}
+
+input[type="checkbox"] {
+	display: none;
+}
+
+button.icon {
+	background-color: transparent;
+	border: none;
+	cursor: pointer;
+	font-size: 18px;
+	color: #888;
+	transition: color 0.3s;
+}
+
+button.icon:hover {
+	color: #333;
+}
