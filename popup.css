@@ -39,6 +39,22 @@ button:hover {
 	background-color: #45a049;
 }
 
+button.icon.save-icon {
+	background-color: #4CAF50;
+	color: white;
+	border: none;
+	padding: 5px;
+	font-size: 16px;
+	border-radius: 5px;
+	cursor: pointer;
+	transition: background-color 0.3s;
+	margin-left: 5px;
+}
+
+button.icon.save-icon:hover {
+	background-color: #45a049;
+}
+
 #reminder-list {
 	margin-top: 20px;
 	overflow-y: auto; /* Allow vertical scrolling if necessary */
@@ -148,4 +164,21 @@ button.icon:hover {
 .message.hide {
 	right: -100%;
 	opacity: 0;
+}
+
+.edit-title,
+.edit-time {
+	padding: 5px;
+	font-size: 16px;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	width: calc(100% - 10px);
+	margin-bottom: 5px;
+}
+
+.edit-title:focus,
+.edit-time:focus {
+	border-color: #4CAF50;
+	outline: none;
+	box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
 }

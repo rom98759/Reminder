@@ -38,23 +38,23 @@ function renderReminders(reminders) {
 
 			reminderElement.innerHTML = `
 				<div class="reminder-item-content">
-					<span>${truncatedTitle} at ${reminder.time}</span>
+						<span class="reminder-title">${truncatedTitle}</span> at <span class="reminder-time">${reminder.time}</span>
 				</div>
 				<div class="reminder-item-actions">
 					<input type="checkbox" id="toggle-${index}" ${reminder.active ? 'checked' : ''}>
 					<label for="toggle-${index}" class="toggle-switch"></label>
-					<button class="icon">✏️</button>
-					<button class="icon">❌</button>
+					<button class="icon edit-icon">✏️</button>
+					<button class="icon delete-icon">❌</button>
 				</div>
 			`;
 
 			// Add event listeners after adding the HTML
 			const toggleSwitch = reminderElement.querySelector(`#toggle-${index}`);
-			const editButton = reminderElement.querySelector('.icon:first-of-type');
-			const deleteButton = reminderElement.querySelector('.icon:last-of-type');
+			const editButton = reminderElement.querySelector('.edit-icon');
+			const deleteButton = reminderElement.querySelector('.delete-icon');
 
 			toggleSwitch.addEventListener('click', () => toggleReminder(index));
-			editButton.addEventListener('click', () => editReminder(index, reminders));
+			editButton.addEventListener('click', () => enableEditMode(reminderElement, index, reminders));
 			deleteButton.addEventListener('click', () => deleteReminder(index, reminders));
 
 			list.appendChild(reminderElement);
@@ -95,16 +95,55 @@ function toggleReminder(index) {
 	});
 }
 
-function editReminder(index, sortedReminders) {
-	chrome.storage.local.get(["reminders"], function (result) {
-		const reminders = result.reminders || [];
-		const reminder = sortedReminders[index];
-		const originalIndex = reminders.findIndex(r => r.title === reminder.title && r.time === reminder.time);
+function enableEditMode(reminderElement, index, sortedReminders) {
+	const reminder = sortedReminders[index];
+	const originalTitle = reminder.title;
+	const originalTime = reminder.time;
 
-		const newTitle = prompt("Modify title", reminder.title);
-		const newTime = prompt("Modify time (HH:MM)", reminder.time);
+	const titleSpan = reminderElement.querySelector('.reminder-title');
+	const timeSpan = reminderElement.querySelector('.reminder-time');
 
-		if (newTitle && newTime) {
+	titleSpan.innerHTML = `<input type="text" class="edit-title" value="${originalTitle}">`;
+	timeSpan.innerHTML = `<input type="time" class="edit-time" value="${originalTime}">`;
+
+	const editTitleInput = reminderElement.querySelector('.edit-title');
+	const editTimeInput = reminderElement.querySelector('.edit-time');
+
+	editTitleInput.focus();
+
+	const saveButton = document.createElement('button');
+	saveButton.classList.add('icon', 'save-icon');
+	saveButton.textContent = '✔️';
+	reminderElement.querySelector('.reminder-item-actions').appendChild(saveButton);
+
+	// Disable other buttons and inputs
+	document.querySelectorAll('button').forEach(button => button.disabled = true);
+	document.querySelectorAll('input').forEach(input => input.disabled = true);
+	saveButton.disabled = false;
+	editTitleInput.disabled = false;
+	editTimeInput.disabled = false;
+
+	saveButton.addEventListener('click', () => {
+		saveEdit(reminderElement, index, sortedReminders);
+		// Re-enable other buttons and inputs
+		document.querySelectorAll('button').forEach(button => button.disabled = false);
+		document.querySelectorAll('input').forEach(input => input.disabled = false);
+	});
+}
+
+function saveEdit(reminderElement, index, sortedReminders) {
+	const editTitleInput = reminderElement.querySelector('.edit-title');
+	const editTimeInput = reminderElement.querySelector('.edit-time');
+
+	const newTitle = editTitleInput.value;
+	const newTime = editTimeInput.value;
+
+	if (newTitle && newTime) {
+		chrome.storage.local.get(["reminders"], function (result) {
+			const reminders = result.reminders || [];
+			const reminder = sortedReminders[index];
+			const originalIndex = reminders.findIndex(r => r.title === reminder.title && r.time === reminder.time);
+
 			// Remove the old alarm
 			chrome.alarms.clear(reminder.title, () => {
 				// Update the reminder
@@ -115,8 +154,10 @@ function editReminder(index, sortedReminders) {
 					showMessage("Reminder updated successfully.");
 				});
 			});
-		}
-	});
+		});
+	} else {
+		showMessage("Please enter both title and time.", true);
+	}
 }
 
 function deleteReminder(index, sortedReminders) {
