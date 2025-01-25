@@ -6,6 +6,9 @@ document.addEventListener("DOMContentLoaded", function () {
 		const time = document.getElementById("time").value;
 		if (title && time) {
 			addReminder(title, time);
+			showMessage("Reminder added successfully.");
+		} else {
+			showMessage("Please enter both title and time.", true);
 		}
 	});
 
@@ -31,7 +34,7 @@ function renderReminders(reminders) {
 			const reminderElement = document.createElement("div");
 			reminderElement.classList.add("reminder-item");
 
-			const truncatedTitle = reminder.title.length > 10 ? `${reminder.title.slice(0, 10)}...` : reminder.title;
+			const truncatedTitle = reminder.title.length > 15 ? `${reminder.title.slice(0, 15)}.` : reminder.title;
 
 			reminderElement.innerHTML = `
 				<div class="reminder-item-content">
@@ -51,8 +54,8 @@ function renderReminders(reminders) {
 			const deleteButton = reminderElement.querySelector('.icon:last-of-type');
 
 			toggleSwitch.addEventListener('click', () => toggleReminder(index));
-			editButton.addEventListener('click', () => editReminder(index));
-			deleteButton.addEventListener('click', () => deleteReminder(index));
+			editButton.addEventListener('click', () => editReminder(index, reminders));
+			deleteButton.addEventListener('click', () => deleteReminder(index, reminders));
 
 			list.appendChild(reminderElement);
 		});
@@ -92,10 +95,11 @@ function toggleReminder(index) {
 	});
 }
 
-function editReminder(index) {
+function editReminder(index, sortedReminders) {
 	chrome.storage.local.get(["reminders"], function (result) {
 		const reminders = result.reminders || [];
-		const reminder = reminders[index];
+		const reminder = sortedReminders[index];
+		const originalIndex = reminders.findIndex(r => r.title === reminder.title && r.time === reminder.time);
 
 		const newTitle = prompt("Modify title", reminder.title);
 		const newTime = prompt("Modify time (HH:MM)", reminder.time);
@@ -104,26 +108,30 @@ function editReminder(index) {
 			// Remove the old alarm
 			chrome.alarms.clear(reminder.title, () => {
 				// Update the reminder
-				reminders[index] = { title: newTitle, time: newTime, active: true };
+				reminders[originalIndex] = { title: newTitle, time: newTime, active: true };
 				chrome.storage.local.set({ reminders }, function () {
 					loadReminders();
 					scheduleNotification(newTitle, newTime);
+					showMessage("Reminder updated successfully.");
 				});
 			});
 		}
 	});
 }
 
-function deleteReminder(index) {
+function deleteReminder(index, sortedReminders) {
 	chrome.storage.local.get(["reminders"], function (result) {
 		const reminders = result.reminders || [];
-		const reminder = reminders[index];
+		const reminder = sortedReminders[index];
+		const originalIndex = reminders.findIndex(r => r.title === reminder.title && r.time === reminder.time);
+
 		// Remove the alarm
 		chrome.alarms.clear(reminder.title, () => {
 			// Remove the reminder from the list
-			reminders.splice(index, 1);
+			reminders.splice(originalIndex, 1);
 			chrome.storage.local.set({ reminders }, function () {
 				loadReminders();
+				showMessage("Reminder deleted successfully.");
 			});
 		});
 	});
@@ -139,4 +147,23 @@ function scheduleNotification(title, time) {
 
 	// Send a message to set the alarm
 	chrome.runtime.sendMessage({ type: 'set-alarm', reminder: { title, time, active: true } });
+}
+
+function showMessage(message, isError = false) {
+	const messageContainer = document.getElementById("message-container");
+	const msgDiv = document.createElement("div");
+	msgDiv.classList.add("message");
+	if (isError) msgDiv.classList.add("error");
+	msgDiv.textContent = message;
+	messageContainer.appendChild(msgDiv);
+	setTimeout(() => {
+		msgDiv.classList.add("show");
+	}, 10);
+	setTimeout(() => {
+		msgDiv.classList.remove("show");
+		msgDiv.classList.add("hide");
+		setTimeout(() => {
+			messageContainer.removeChild(msgDiv);
+		}, 500);
+	}, 2000);
 }

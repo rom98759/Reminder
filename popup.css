@@ -122,3 +122,30 @@ button.icon {
 button.icon:hover {
 	color: #333;
 }
+
+.message {
+	position: fixed;
+	top: 15px;
+	right: -100%;
+	background-color: #4CAF50;
+	color: white;
+	padding: 10px;
+	border-radius: 5px;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+	transition: right 0.5s, opacity 0.5s;
+	z-index: 1000;
+}
+
+.message.error {
+	background-color: #f44336;
+}
+
+.message.show {
+	right: 10px;
+	opacity: 1;
+}
+
+.message.hide {
+	right: -100%;
+	opacity: 0;
+}
