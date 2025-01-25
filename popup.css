@@ -9,6 +9,42 @@ body {
 	overflow: hidden; /* Prevent scrolling */
 }
 
+body.dark-theme {
+	background-color: #333;
+	color: #f0f0f0;
+}
+
+body.dark-theme .reminder-item {
+	background-color: #444;
+	color: #f0f0f0;
+}
+
+body.dark-theme button {
+	background-color: #555;
+	color: #f0f0f0;
+}
+
+body.dark-theme button:hover {
+	background-color: #666;
+}
+
+body.dark-theme .toggle-switch {
+	background-color: #555;
+}
+
+body.dark-theme .toggle-switch::before {
+	background-color: #f0f0f0;
+}
+
+body.dark-theme .message {
+	background-color: #555;
+	color: #f0f0f0;
+}
+
+body.dark-theme .message.error {
+	background-color: #f44336;
+}
+
 #reminder-container {
 	display: flex;
 	flex-direction: column;
@@ -181,4 +217,16 @@ button.icon:hover {
 	border-color: #4CAF50;
 	outline: none;
 	box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+}
+
+.settings-link {
+	position: fixed;
+	bottom: 10px;
+	right: 10px;
+}
+
+.settings-icon {
+	width: 24px;
+	height: 24px;
+	cursor: pointer;
 }

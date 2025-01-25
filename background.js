@@ -7,24 +7,30 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 	if (alarm.name.startsWith("reminder_")) {
 		const reminderTitle = alarm.name.replace("reminder_", "");
 
-		// Create a notification
-		chrome.notifications.create({
-			type: "basic",
-			iconUrl: "icon.png",
-			title: "Reminder",
-			message: `It's time for: ${reminderTitle}`,
-			priority: 2, // High priority
-			requireInteraction: true
-		});
+		// Get persistent notification setting
+		chrome.storage.sync.get("persistentNotifications", (data) => {
+			const persistent = data.persistentNotifications || false;
+			const priority = persistent ? 2 : 0; // High priority or default
 
-		// Disable the reminder after it has been executed
-		chrome.storage.local.get("reminders", (data) => {
-			const reminders = data.reminders || [];
-			const index = reminders.findIndex((r) => r.title === reminderTitle);
-			if (index !== -1) {
-				reminders[index].active = false;
-				chrome.storage.local.set({ reminders });
-			}
+			// Create a notification
+			chrome.notifications.create({
+				type: "basic",
+				iconUrl: "icon.png",
+				title: "Reminder",
+				message: `It's time for: ${reminderTitle}`,
+				priority: priority,
+				requireInteraction: persistent
+			});
+
+			// Disable the reminder after it has been executed
+			chrome.storage.local.get("reminders", (data) => {
+				const reminders = data.reminders || [];
+				const index = reminders.findIndex((r) => r.title === reminderTitle);
+				if (index !== -1) {
+					reminders[index].active = false;
+					chrome.storage.local.set({ reminders });
+				}
+			});
 		});
 	}
 });

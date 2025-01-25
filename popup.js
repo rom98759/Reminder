@@ -1,6 +1,32 @@
 document.addEventListener("DOMContentLoaded", function () {
-	// Add event listener to the button
 	const addReminderButton = document.getElementById("add-reminder");
+	const settingsLink = document.querySelector(".settings-link");
+	const body = document.body;
+
+	// Charger les préférences utilisateur
+	chrome.storage.sync.get(['darkTheme', 'persistentNotifications'], function (result) {
+		if (result.darkTheme) {
+			body.classList.add('dark-theme');
+		} else {
+			body.classList.remove('dark-theme');
+		}
+		window.persistentNotifications = result.persistentNotifications || false;
+	});
+
+	// Réagir aux changements d'options
+	chrome.runtime.onMessage.addListener((message) => {
+		if (message.type === 'settings-changed') {
+			const { darkTheme, persistentNotifications } = message.settings;
+			if (darkTheme) {
+				body.classList.add('dark-theme');
+			} else {
+				body.classList.remove('dark-theme');
+			}
+			window.persistentNotifications = persistentNotifications;
+		}
+	});
+
+	// Ajouter un rappel
 	addReminderButton.addEventListener("click", function () {
 		const title = document.getElementById("title").value;
 		const time = document.getElementById("time").value;
@@ -122,12 +148,14 @@ function enableEditMode(reminderElement, index, sortedReminders) {
 	saveButton.disabled = false;
 	editTitleInput.disabled = false;
 	editTimeInput.disabled = false;
+	document.querySelector(".settings-link").style.pointerEvents = 'none'; // Disable settings link
 
 	saveButton.addEventListener('click', () => {
 		saveEdit(reminderElement, index, sortedReminders);
 		// Re-enable other buttons and inputs
 		document.querySelectorAll('button').forEach(button => button.disabled = false);
 		document.querySelectorAll('input').forEach(input => input.disabled = false);
+		document.querySelector(".settings-link").style.pointerEvents = 'auto'; // Re-enable settings link
 	});
 }
 
@@ -187,7 +215,7 @@ function scheduleNotification(title, time) {
 	}
 
 	// Send a message to set the alarm
-	chrome.runtime.sendMessage({ type: 'set-alarm', reminder: { title, time, active: true } });
+	chrome.runtime.sendMessage({ type: 'set-alarm', reminder: { title, time, active: true, persistent: window.persistentNotifications } });
 }
 
 function showMessage(message, isError = false) {
