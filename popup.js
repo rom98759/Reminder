@@ -79,7 +79,7 @@ function renderReminders(reminders) {
 			const editButton = reminderElement.querySelector('.edit-icon');
 			const deleteButton = reminderElement.querySelector('.delete-icon');
 
-			toggleSwitch.addEventListener('click', () => toggleReminder(index));
+			toggleSwitch.addEventListener('click', () => toggleReminder(index, reminders));
 			editButton.addEventListener('click', () => enableEditMode(reminderElement, index, reminders));
 			deleteButton.addEventListener('click', () => deleteReminder(index, reminders));
 
@@ -111,15 +111,24 @@ function addReminder(title, time) {
 	});
 }
 
-function toggleReminder(index) {
+function toggleReminder(index, sortedReminders) {
 	chrome.storage.local.get(["reminders"], function (result) {
 		const reminders = result.reminders || [];
-		reminders[index].active = !reminders[index].active;
-		chrome.storage.local.set({ reminders }, function () {
-			loadReminders();
-		});
+
+		// Trouver l'index réel dans la liste originale
+		const reminder = sortedReminders[index];
+		const originalIndex = reminders.findIndex(r => r.title === reminder.title && r.time === reminder.time);
+
+		if (originalIndex !== -1) {
+			// Basculer l'état actif/inactif
+			reminders[originalIndex].active = !reminders[originalIndex].active;
+			chrome.storage.local.set({ reminders }, function () {
+				loadReminders();
+			});
+		}
 	});
 }
+
 
 function enableEditMode(reminderElement, index, sortedReminders) {
 	const reminder = sortedReminders[index];
