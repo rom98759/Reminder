@@ -30,11 +30,18 @@ document.addEventListener("DOMContentLoaded", function () {
 	addReminderButton.addEventListener("click", function () {
 		const title = document.getElementById("title").value;
 		const time = document.getElementById("time").value;
+		const titleInput = document.getElementById("title");
+		const timeInput = document.getElementById("time");
+
 		if (title && time) {
 			addReminder(title, time);
 			showMessage("Reminder added successfully.");
+			titleInput.classList.remove("input-error");
+			timeInput.classList.remove("input-error");
 		} else {
 			showMessage("Please enter both title and time.", true);
+			if (!title) titleInput.classList.add("input-error");
+			if (!time) timeInput.classList.add("input-error");
 		}
 	});
 

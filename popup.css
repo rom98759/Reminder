@@ -219,6 +219,11 @@ button.icon:hover {
 	box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
 }
 
+.input-error {
+	border-color: #f44336;
+	box-shadow: 0 0 8px rgb(255, 17, 0);
+}
+
 .settings-link {
 	position: fixed;
 	bottom: 10px;
