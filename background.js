@@ -5,7 +5,7 @@ chrome.runtime.onInstalled.addListener(function () {
 // Listen for alarms and display a notification
 chrome.alarms.onAlarm.addListener((alarm) => {
 	if (alarm.name.startsWith("reminder_")) {
-		const reminderTitle = alarm.name.replace("reminder_", "");
+		const [_, reminderTitle, reminderTime] = alarm.name.split("_");
 
 		// Get persistent notification setting
 		chrome.storage.sync.get("persistentNotifications", (data) => {
@@ -17,7 +17,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 				type: "basic",
 				iconUrl: "icon.png",
 				title: "Reminder",
-				message: `It's time for: ${reminderTitle}`,
+				message: `It's time for: ${reminderTitle} at ${reminderTime}`,
 				priority: priority,
 				requireInteraction: persistent
 			});
@@ -25,7 +25,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 			// Disable the reminder after it has been executed
 			chrome.storage.local.get("reminders", (data) => {
 				const reminders = data.reminders || [];
-				const index = reminders.findIndex((r) => r.title === reminderTitle);
+				const index = reminders.findIndex((r) => r.title === reminderTitle && r.time === reminderTime);
 				if (index !== -1) {
 					reminders[index].active = false;
 					chrome.storage.local.set({ reminders });
@@ -54,6 +54,8 @@ chrome.runtime.onMessage.addListener((message) => {
 		if (active) {
 			scheduleAlarm(title, time);
 		}
+	} else if (message.type === "delete-alarm") {
+		chrome.alarms.clear(`reminder_${message.title}_${message.time}`);
 	}
 });
 
@@ -68,5 +70,5 @@ function scheduleAlarm(title, time) {
 	}
 
 	const delayInMinutes = Math.max((alarmTime - now) / 60000, 0.5); // At least 30 seconds
-	chrome.alarms.create(`reminder_${title}`, { delayInMinutes });
+	chrome.alarms.create(`reminder_${title}_${time}`, { delayInMinutes });
 }

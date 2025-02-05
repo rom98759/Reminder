@@ -203,15 +203,17 @@ function deleteReminder(index, sortedReminders) {
 		const reminder = sortedReminders[index];
 		const originalIndex = reminders.findIndex(r => r.title === reminder.title && r.time === reminder.time);
 
-		// Remove the alarm
-		chrome.alarms.clear(reminder.title, () => {
-			// Remove the reminder from the list
-			reminders.splice(originalIndex, 1);
-			chrome.storage.local.set({ reminders }, function () {
-				loadReminders();
-				showMessage("Reminder deleted successfully.");
+		if (originalIndex !== -1) {
+			// Remove the alarm
+			chrome.alarms.clear(`reminder_${reminder.title}_${reminder.time}`, () => {
+				// Remove the reminder from the list
+				reminders.splice(originalIndex, 1);
+				chrome.storage.local.set({ reminders }, function () {
+					loadReminders();
+					showMessage("Reminder deleted successfully.");
+				});
 			});
-		});
+		}
 	});
 }
 
